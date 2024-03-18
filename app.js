@@ -1,44 +1,59 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(bodyParser.json());
 
-app.post('/api/data', (req, res) => {
-  const inputArray = req.body.inputArray;
-  const userID = req.body.userID;
-  const emailID = req.body.emailID;
-  const collegeRollNumber = req.body.collegeRollNumber;
+app.post('/bfhl', (req, res) => {
+    try {
+        // Extracting data from the request body
+        const { array } = req.body;
 
-  if (!inputArray || !userID || !emailID || !collegeRollNumber) {
-    return res.status(400).json({
-      status: 'Error',
-      userID,
-      emailID,
-      collegeRollNumber,
-      data: {
-        evenNumbers: [],
-        oddNumbers: [],
-        alphabets: [],
-      },
-    });
-  }
+        // User ID generation
+        const userId = generateUserId('your_name', 'ddmmyyyy');
 
-  const evenNumbers = [];
-  const oddNumbers = [];
-  const alphabets = [];
+        // Processing the array
+        const evenNumbers = [];
+        const oddNumbers = [];
+        const alphabetsUpperCase = [];
+        array.forEach(item => {
+            if (typeof item === 'number') {
+                if (item % 2 === 0) {
+                    evenNumbers.push(item);
+                } else {
+                    oddNumbers.push(item);
+                }
+            } else if (typeof item === 'string' && item.match(/[a-zA-Z]/)) {
+                alphabetsUpperCase.push(item.toUpperCase());
+            }
+        });
 
-  inputArray.forEach((element) => {
-    if (typeof element === 'number') {
-      if (element % 2 === 0) {
-        evenNumbers.push(element);
-      } else {
-        oddNumbers.push(element);
-      }
-    } else if (typeof element === 'string' && /[a-zA-Z]/.test(element)) {
-      alphabets.push(element.toUpperCase());
+        // Constructing the response
+        const response = {
+            user_id: userId,
+            is_success: true,
+            even_numbers: evenNumbers,
+            odd_numbers: oddNumbers,
+            uppercase_alphabets: alphabetsUpperCase
+        };
+
+        // Sending the response
+        res.json(response);
+    } catch (error) {
+        // Handling exceptions
+        res.status(500).json({ error: error.message });
     }
-  });
+});
 
-  res.status(200).json({
-    status: 'Success',
+// Function to generate user ID
+function generateUserId(fullName, dob) {
+    const formattedDob = dob.replace(/-/g, '');
+    return `${fullName}_${formattedDob}`;
+}
+
+// Starting the server
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
