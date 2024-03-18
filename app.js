@@ -1,47 +1,44 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-
 const app = express();
-app.use(bodyParser.json());
+const port = 3000;
 
-app.post('/bfhl', (req, res) => {
-  const data = req.body.data;
-  const userId = john_doe_17091999;
-  const email = john@xyz.com;
-  const rollNumber = ABCD123;
+app.use(express.json());
 
-  const oddNumbers = [];
+app.post('/api/data', (req, res) => {
+  const inputArray = req.body.inputArray;
+  const userID = req.body.userID;
+  const emailID = req.body.emailID;
+  const collegeRollNumber = req.body.collegeRollNumber;
+
+  if (!inputArray || !userID || !emailID || !collegeRollNumber) {
+    return res.status(400).json({
+      status: 'Error',
+      userID,
+      emailID,
+      collegeRollNumber,
+      data: {
+        evenNumbers: [],
+        oddNumbers: [],
+        alphabets: [],
+      },
+    });
+  }
+
   const evenNumbers = [];
+  const oddNumbers = [];
   const alphabets = [];
 
-  data.forEach(item => {
-    if (typeof item === 'number') {
-      if (item % 2 === 0) {
-        evenNumbers.push(item);
+  inputArray.forEach((element) => {
+    if (typeof element === 'number') {
+      if (element % 2 === 0) {
+        evenNumbers.push(element);
       } else {
-        oddNumbers.push(item);
+        oddNumbers.push(element);
       }
-    } else if (typeof item === 'string') {
-      if (/^[A-Za-z]+$/.test(item)) {
-        alphabets.push(item.toUpperCase());
-      }
+    } else if (typeof element === 'string' && /[a-zA-Z]/.test(element)) {
+      alphabets.push(element.toUpperCase());
     }
   });
 
-  const response = {
-    is_success: true,
-    user_id: userId,
-    email: email,
-    roll_number: rollNumber,
-    odd_numbers: oddNumbers,
-    even_numbers: evenNumbers,
-    alphabets: alphabets
-  };
-
-  res.json(response);
-});
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(Server is running on port ${port});
-});
+  res.status(200).json({
+    status: 'Success',
